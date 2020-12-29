@@ -37,11 +37,11 @@
 #include "mme_config.h"
 #include "s1ap_common.h"
 #include "s1ap_mme_gummei.h"
+#include "TrackingAreaIdentity.h"
 
 int s1ap_mme_compare_gummei(const S1AP_PLMNidentity_t* const tbcd_plmn) {
   int num_gummei;
   int rc = RETURNerror;
-  int i = 0;
   plmn_t plmn;
 
   DevAssert(tbcd_plmn != NULL);
@@ -63,25 +63,26 @@ int s1ap_mme_compare_gummei(const S1AP_PLMNidentity_t* const tbcd_plmn) {
   for (num_gummei = 0; num_gummei < mme_config.gummei.nb; num_gummei++) {
     /*Verify that the MME code within S-TMSI is same as what is configured in
      * MME conf*/
-    if ((plmn.mcc_digit2 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mcc_digit2) &&
-        (plmn.mcc_digit1 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mcc_digit1) &&
-        (plmn.mnc_digit3 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mnc_digit3) &&
-        (plmn.mcc_digit3 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mcc_digit3) &&
-        (plmn.mnc_digit2 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mnc_digit2) &&
-        (plmn.mnc_digit1 ==
-         mme_config.gummei.gummei[num_gummei].plmn.mnc_digit1)) {
+    OAILOG_DEBUG(LOG_S1AP,
+    "Checking GUMMEI %d PLMN MCC %d.%d.%d MNC %d.%d.%d vs MCC %d.%d.%d MNC %d.%d.%d\n",
+        num_gummei,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mcc_digit1,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mcc_digit2,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mcc_digit3,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mnc_digit1,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mnc_digit2,
+        (int) mme_config.gummei.gummei[num_gummei].plmn.mnc_digit3,
+        (int) plmn.mcc_digit1, (int) plmn.mcc_digit2, (int) plmn.mcc_digit3,
+        (int) plmn.mnc_digit1, (int) plmn.mnc_digit2, (int) plmn.mnc_digit3);
+
+    if (PLMNS_ARE_EQUAL(plmn, mme_config.gummei.gummei[num_gummei].plmn)) {
       rc = RETURNok;
       break;
     }
   }
   mme_config_unlock(&mme_config);
   if (num_gummei >= mme_config.gummei.nb) {
-    OAILOG_ERROR(LOG_S1AP, "No MME-GUMMEI serves this eNB");
+    OAILOG_ERROR(LOG_S1AP, "No MME-GUMMEI serves this eNB PLMN " PLMN_FMT "\n", PLMN_ARG(&plmn));
   }
   OAILOG_FUNC_RETURN(LOG_S1AP, rc);
 }
