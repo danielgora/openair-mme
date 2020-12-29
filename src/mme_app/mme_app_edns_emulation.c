@@ -74,13 +74,15 @@ int mme_app_edns_add_wrr_entry(bstring id, struct sockaddr *edns_ip_addr,
       memcpy((void *)data, (struct sockaddr_in6 *)edns_ip_addr,
              sizeof(struct sockaddr_in6));
     } else {
-      OAILOG_DEBUG(LOG_MME_APP, "Unknown socket address family %d",
+      OAILOG_DEBUG(LOG_MME_APP, "Unknown socket address family %d\n",
                    edns_ip_addr->sa_family);
       free_wrapper(&cid);
       return RETURNerror;
     }
     if (data) {
       hashtable_rc_t rc;
+      OAILOG_DEBUG(LOG_MME_APP, "Adding DNS entry %s family %d interface type %d\n",
+                   cid, edns_ip_addr->sa_family, interface_type);
       switch (interface_type) {
         case S10_MME_GTP_C:
           rc = obj_hashtable_insert(mme_e_dns_entries, cid, strlen(cid), data);
@@ -89,7 +91,7 @@ int mme_app_edns_add_wrr_entry(bstring id, struct sockaddr *edns_ip_addr,
           rc = obj_hashtable_insert(sgw_e_dns_entries, cid, strlen(cid), data);
           break;
         default:
-          OAILOG_DEBUG(LOG_MME_APP, "Unknown interface type %d",
+          OAILOG_DEBUG(LOG_MME_APP, "Unknown interface type %d\n",
                        interface_type);
           return RETURNerror;
       }
@@ -124,10 +126,11 @@ int mme_app_edns_init(const mme_config_t *mme_config_p) {
     //      mme_app_edns_add_mme_entry(mme_config_p->e_dns_emulation.mme_id[i],
     //      mme_config_p->e_dns_emulation.mme_ip_addr[i]);
     //    }
-    OAILOG_DEBUG(LOG_MME_APP, "Failed to populate eDNS");
+    if (rc != RETURNok)
+      OAILOG_DEBUG(LOG_MME_APP, "Failed to populate eDNS\n");
     return rc;
   }
-  OAILOG_DEBUG(LOG_MME_APP, "Failed to create eDNS hashtables");
+  OAILOG_DEBUG(LOG_MME_APP, "Failed to create eDNS hashtables\n");
   return RETURNerror;
 }
 

@@ -84,9 +84,11 @@ void mme_app_select_service(const tai_t* const tai,
   }
   bcatcstr(application_unique_string, ".3gppnetwork.org");
 
+  OAILOG_DEBUG(LOG_MME_APP, "Looking up IP for service %s iface_type %d\n",
+               application_unique_string->data, interface_type);
+
   mme_app_edns_get_wrr_entry(application_unique_string, interface_type,
                              service_ip_addr);
-
   if (*service_ip_addr) {
     if ((*service_ip_addr)->sa_family == AF_INET) {
       OAILOG_DEBUG(
